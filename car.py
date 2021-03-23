@@ -5,29 +5,25 @@ import math
 from math import pi
 
 localpath = os.path.dirname(os.path.abspath(__file__))
-lapTimer = pygame.time.Clock()
 
 #constants
 playerTopSpeed = 1
 playerAcceleration = 0.01
 playerTurnSpeed = 0.4
 playerDeadzoneSpeed = 0.05
+raycastRange = 500
 
 playerSprite = pygame.image.load(os.path.join(localpath, "car.png"))
 
-#variables
-playerSpeed = 0
-playerPos = [0, 0]
-playerRotation = 0
-playerRotationRad = playerRotation * pi / 180
 
-raycastRange = 500
 
-checkpoint = False
+
 
 roadColor = pygame.Color(255, 255, 255, 255)
 wallColor = pygame.Color(0, 0, 0, 255)
-checkpointColor = pygame.Color(0, 162, 232, 255)
+checkpoint1Color = pygame.Color(34, 177, 76, 255)
+checkpoint2Color = pygame.Color(0, 162, 232, 255)
+checkpoint3Color = pygame.Color(63, 72, 204, 255)
 finishLineColor = pygame.Color(237, 28, 36, 255)
 
 
@@ -43,91 +39,117 @@ class car(pygame.sprite.Sprite):
         self.image = playerSprite
         self.rect = playerSprite.get_rect(center = playerSprite.get_rect(center = position).center)
 
-        global lapTimer
-        lapTimer.tick()
+        #variables
+        self.playerSpeed = 0
+        self.playerPos = position
+        self.playerRotation = 0
+        self.playerRotationRad = self.playerRotation * pi / 180
 
-        global playerSpeed
-        global playerPos
-        global playerRotation
-        global playerRotationRad
-        playerSpeed = 0
-        playerPos = position
-        playerRotation = rotation
-        playerRotationRad = rotation * pi / 180
+        self.checkpoint1 = False
+        self.checkpoint2 = False
+        self.checkpoint3 = False
 
-    def updateMovement(self, keysPressed, deltaT):
+        self.lapTimer = pygame.time.Clock()
+        self.lapTimer.tick()
+
+        self.playerSpeed = 0
+        self.playerPos = position
+        self.playerRotation = rotation
+        self.playerRotationRad = rotation * pi / 180
+
+    def updateMovement(self, input, deltaT):
         global playerTopSpeed
         global playerAcceleration
         global playerTurnSpeed
         global playerDeadzoneSpeed
 
-        global playerSpeed
-        global playerPos
-        global playerRotation
-        global playerRotationRad
-
-        #keys pressed convert to values
-        forwardBackward = -(int(keysPressed[pygame.K_w]) - int(keysPressed[pygame.K_s]))
-        rotation = (int(keysPressed[pygame.K_a]) - int(keysPressed[pygame.K_d]))
+        #input values are forward & back, and left & right
+        forwardBackward = input[0]
+        leftRight = input[1]
         
         #not accelerating
-        if forwardBackward == 0 and playerSpeed != 0:
-            playerSpeed += playerAcceleration * (int(playerSpeed < 0) * 2 - 1) / 5
+        if forwardBackward == 0 and self.playerSpeed != 0:
+            self.playerSpeed += playerAcceleration * (int(self.playerSpeed < 0) * 2 - 1) / 5
 
         #set deadzone
-        if abs(playerSpeed) < playerDeadzoneSpeed and forwardBackward == 0:
-            playerSpeed = 0
+        if abs(self.playerSpeed) < playerDeadzoneSpeed and forwardBackward == 0:
+            self.playerSpeed = 0
 
         #acceleration
-        if forwardBackward != 0 and abs(playerSpeed) < playerTopSpeed:
+        if forwardBackward != 0 and abs(self.playerSpeed) < playerTopSpeed:
             #accelerating
             braking = 1 # not braking
-            if int(forwardBackward > 0) != int(playerSpeed > 0): # braking
+            if int(forwardBackward > 0) != int(self.playerSpeed > 0): # braking
                 braking = 2
-            playerSpeed += forwardBackward * playerAcceleration * braking
+            self.playerSpeed += forwardBackward * playerAcceleration * braking
 
 
         #turn influence is a turningspeed variable affected by playerspeed
-        if playerSpeed == 0:
+        if self.playerSpeed == 0:
             turnInfluence = 0
         else:
-            turnInfluence = 1 / abs(playerSpeed)
+            turnInfluence = 1 / abs(self.playerSpeed)
             if turnInfluence > playerTurnSpeed:
                 turnInfluence = playerTurnSpeed
-        playerRotation += rotation * playerTurnSpeed * turnInfluence * (int(playerSpeed < 0) * 2 - 1) * deltaT
-        playerRotationRad = playerRotation * pi / 180
+        self.playerRotation += leftRight * playerTurnSpeed * turnInfluence * (int(self.playerSpeed < 0) * 2 - 1) * deltaT
+        self.playerRotationRad = self.playerRotation * pi / 180
 
-        playerPos[0] += math.sin(playerRotationRad) * playerSpeed * deltaT
-        playerPos[1] += math.cos(playerRotationRad) * playerSpeed * deltaT
+        self.playerPos[0] += math.sin(self.playerRotationRad) * self.playerSpeed * deltaT
+        self.playerPos[1] += math.cos(self.playerRotationRad) * self.playerSpeed * deltaT
 
-        self.image = pygame.transform.rotate(playerSprite, playerRotation)
+        self.status = True
+
+        self.image = pygame.transform.rotate(playerSprite, self.playerRotation)
         self.rect = self.image.get_rect(center = playerSprite.get_rect(center = (0, 0)).center)
 
-        self.rect.move_ip(playerPos)
+        self.rect.move_ip(self.playerPos)
 
 
         #playerPos[0] += (playerMovement[3] - playerMovement[2]) * playerTopSpeed
 
     def checkStatus(self, map):
-        global lapTimer
-        global checkpoint
         
-        playerPixel = colorAtPos(map, playerPos)
+        playerPixel = colorAtPos(map, self.playerPos)
         if(playerPixel != roadColor):
             #if crashed, return false, else return true as in alive
             
-            if playerPixel == finishLineColor and checkpoint:
-                lapTimer.tick()
-                checkpoint = False
+            if playerPixel == finishLineColor and self.checkpoint1 and self.checkpoint2 and self.checkpoint3:
+                self.lapTimer.tick()
+                self.checkpoint1 = False
+                self.checkpoint2 = False
+                self.checkpoint3 = False
                 return ['finish', lapTimer.get_time()/1000]
             
             if playerPixel == wallColor:
                 return ['crash', 0]
 
-            if playerPixel == checkpointColor:
-                checkpoint = True
+            if playerPixel == checkpoint1Color and not self.checkpoint1:
+                print('checkpoint1')
+                self.checkpoint1 = True
+                return ['checkpoint', 0]
+
+            #must be successive, thus check previous checkpoints
+            if playerPixel == checkpoint2Color and not self.checkpoint2 and self.checkpoint1:
+                print('checkpoint2')
+                self.checkpoint2 = True
+                return ['checkpoint', 0]
+
+            if playerPixel == checkpoint3Color and not self.checkpoint3 and self.checkpoint1 and self.checkpoint2:
+                print('checkpoint3')
+                self.checkpoint3 = True
+                return ['checkpoint', 0]
             
         return ['', 0]
+
+    def rayDistances(self, map):
+        distances = []
+
+        for r in [pi/2, pi/4, 0, -pi/4, -pi/2]:
+            x = raycastDistance(map, self.playerPos, self.playerRotationRad + r) * math.sin(self.playerRotationRad + r)
+            y = raycastDistance(map, self.playerPos, self.playerRotationRad + r) * math.cos(self.playerRotationRad + r)
+            distances.append(math.sqrt(x**2 + y**2))
+
+        return distances
 
     def drawRay(self, display, map):
         rays = []
@@ -137,14 +159,10 @@ class car(pygame.sprite.Sprite):
         
         return rays
 
-    def status(self, status):
-        global playerTopSpeed
-        global playerSpeed
-        if status:
-            playerTopSpeed = 1
+    def changeStatus(self, status):
         if not status:
-            playerTopSpeed = 0
-            playerSpeed = 0
+            self.playerSpeed = 0
+            self.status = False
 
 
 def raycastDistance(map, currentPosition, angle):
@@ -163,5 +181,8 @@ def raycastDistance(map, currentPosition, angle):
     return raycastRange
 
 def colorAtPos(map, position):
+    for p in position:
+        if p < 0:
+            return roadColor
     return map.get_at([round(coord) for coord in position])
         
