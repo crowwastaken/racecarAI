@@ -124,18 +124,15 @@ class car(pygame.sprite.Sprite):
                 return ['crash', 0]
 
             if playerPixel == checkpoint1Color and not self.checkpoint1:
-                print('checkpoint1')
                 self.checkpoint1 = True
                 return ['checkpoint', 0]
 
             #must be successive, thus check previous checkpoints
             if playerPixel == checkpoint2Color and not self.checkpoint2 and self.checkpoint1:
-                print('checkpoint2')
                 self.checkpoint2 = True
                 return ['checkpoint', 0]
 
             if playerPixel == checkpoint3Color and not self.checkpoint3 and self.checkpoint1 and self.checkpoint2:
-                print('checkpoint3')
                 self.checkpoint3 = True
                 return ['checkpoint', 0]
             

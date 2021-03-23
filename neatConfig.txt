@@ -7,8 +7,8 @@ reset_on_extinction  	= False
 
 [DefaultStagnation]
 species_fitness_func = max
-max_stagnation       = 20
-species_elitism      = 3
+max_stagnation       = 10
+species_elitism      = 0
 
 [DefaultReproduction]
 elitism            = 3

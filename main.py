@@ -18,7 +18,7 @@ def run(neatConfig):
     neatPopulation.add_reporter(stats)
     neatPopulation.add_reporter(neat.Checkpointer(5))
 
-    winner = neatPopulation.run(eval_genomes, 1)
+    winner = neatPopulation.run(eval_genomes, 20)
 
 #actual game
 def eval_genomes(ge, config):
@@ -82,35 +82,32 @@ def eval_genomes(ge, config):
             status = player.checkStatus(map)
             if(status[0] == 'finish'):
                 print('finished a lap, time: ', status[1])
-                genome[x].fitness += 50 + int(100/status[1])
+                genomes[x].fitness += 50 + int(100/status[1])
                 
             if(status[0] == 'checkpoint'):
                 print('checkpoint achieved')
-                genome[x].fitness += 5
+                genomes[x].fitness += 5
 
             if(status[0] == 'crash'):
                 print('crashed')
-                
-                #genome[x].fitness -= 1
                 player.changeStatus(False)
 
-                #nets.pop(x)
-                #genomes.pop(x)
-                #playerList.remove(player)
+            if(player.playerSpeed > 0.5):
+                genomes[x].fitness += 0.001
             
         survivingPlayerList = pygame.sprite.Group()
-        survivingGenomes = []
-        survivingNets = []
-
+#        survivingGenomes = []
+#        survivingNets = []
+#
         for x, player in enumerate(playerList):
             if player.status == True:
                 survivingPlayerList.add(player)
-                survivingGenomes.append(genomes[x])
-                survivingNets.append(nets[x])
-
+#                survivingGenomes.append(genomes[x])
+#                survivingNets.append(nets[x])
+#
         playerList = survivingPlayerList
-        genomes = survivingGenomes
-        nets = survivingNets
+#        genomes = survivingGenomes
+#        nets = survivingNets
 
 
         #check current generation population
