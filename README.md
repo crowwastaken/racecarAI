@@ -6,6 +6,14 @@ a simple ai racecar simulation based on NEAT and made with Pygame
 
 current configuration not very ideal for training
 
-preview of game in generation ~5
-color lines indicate checkpoints, rewarding any that pass them in order
-![image](https://user-images.githubusercontent.com/60021675/209078127-72a53344-d81d-40d5-9fc1-e14cb32500de.png)
+
+uses raycasts to determine distance between wall and car:
+
+https://user-images.githubusercontent.com/60021675/210852574-8288d443-7509-4be8-88ed-a5089c8e2af2.mp4
+
+
+
+training preview of 18 generations:
+
+https://user-images.githubusercontent.com/60021675/210860978-bbd9a8ae-6107-4190-b369-09a21aa51688.mp4
+
