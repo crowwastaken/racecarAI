@@ -1,4 +1,4 @@
-# racecarAI
+# neat-racecar
 credits to UnLuckY Studio for the car models
 
 ## Overview
