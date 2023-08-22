@@ -1,7 +1,7 @@
 # neat-racecar
 credits to UnLuckY Studio for the car models
 
-managed to finish one lap, unfortunately recording wasn't active
+first lap finish, unfortunately recording wasn't active
 
 ![image](https://github.com/j-ackyao/neat-racecar/assets/60021675/9b562809-ed73-474f-ad92-6aae46f56aa9)
 
