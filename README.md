@@ -1,11 +1,17 @@
 # neat-racecar
 credits to UnLuckY Studio for the car models
 
+managed to finish one lap, unfortunately recording wasn't active
+
+![image](https://github.com/j-ackyao/neat-racecar/assets/60021675/9b562809-ed73-474f-ad92-6aae46f56aa9)
+
+
+
+
 ## Overview
 a simple ai racecar simulation based on NEAT and made with Pygame
 
 current configuration not very ideal for training
-
 
 checkpoints awards the genotypes that cross it. uses raycasts to determine distance between wall and car:
 
